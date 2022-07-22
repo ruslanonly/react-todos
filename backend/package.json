@@ -1,0 +1,36 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Reaect-todos backend",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "start": "ts-node src/server.ts",
+    "dev": "ts-node-dev src/server.ts"
+  },
+  "keywords": [
+    "React",
+    "todos",
+    "backend"
+  ],
+  "author": "ruslanonly",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.1",
+    "pg": "^8.7.3",
+    "typescript": "^4.7.4"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.13",
+    "@types/node": "^18.0.6",
+    "@types/pg": "^8.6.5",
+    "ts-node": "^10.9.1",
+    "ts-node-dev": "^2.0.0",
+    "tslib": "^2.4.0"
+  },
+  "exports": {
+    ".": {
+      "require": "./commonjs/index.cjs"
+    }
+  }
+}
