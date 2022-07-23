@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
+import axios from 'axios';
 
 import {
+  Spinner,
   Button,
   FormControl,
   FormLabel,
-  FormErrorMessage,
-  FormHelperText,
   Input,
   useBoolean,
   InputGroup,
@@ -20,14 +20,50 @@ import {
   ViewIcon,
   ViewOffIcon
 } from "@chakra-ui/icons"
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+
+type LoginInputState = {
+  username: string,
+  password: string
+}
 
 export default function LoginPage() {
+  const [logining, setLogining] = useBoolean(false);
+  const navigate = useNavigate();
   const [wideDevice] = useMediaQuery("(min-width: 800px)")
   const [showPassword, setShowPassword] = useBoolean(false);
-  const onRegister = () => {
-    console.log(wideDevice);
+  const [inputs, updateInputs] = useState<LoginInputState>({} as LoginInputState)
+
+  const onLogin = async () => {
+    let { username, password } = inputs;
+
+    if (!username || !password) {
+      return ;
+    }
+
+    setLogining.on();
+    try {
+      let response = await axios.post("auth/login", {
+        username: username,
+        password: password
+      });
+      let user = response.data;
+      localStorage.setItem("user", JSON.stringify(user));
+      navigate("/");
+    } catch (error) {
+      console.log(error);
+    }
+    setLogining.off();
   }
+
+  const onInputChange = (event : React.FormEvent<HTMLInputElement>) => {
+    let {name, value} = event.target as HTMLInputElement;
+    updateInputs((prevState : LoginInputState) => ({
+      ...prevState,
+      [name]: value
+    }));
+  }
+
   return (
     <Box 
     display="grid" 
@@ -45,14 +81,21 @@ export default function LoginPage() {
       <Container>
         <FormControl display="grid" gap="3">
           <FormLabel>Username</FormLabel>
-          <Input type='username' placeholder='Enter username'/>
+          <Input 
+          name='username'
+          type='username' 
+          placeholder='Enter username'
+          onChange={onInputChange}/>
 
           <FormLabel>Password</FormLabel>
           <InputGroup>
             <Input 
-              pr="4.5rem"
+              name='password'
               type={showPassword ? 'text' : 'password'} 
               placeholder="Enter your password"
+              pr="4.5rem"
+              onChange={onInputChange}
+
             />
             <InputRightElement width="4.5rem">
               <Button onClick={() => setShowPassword.toggle()} size="sm">
@@ -61,7 +104,10 @@ export default function LoginPage() {
             </InputRightElement>
           </InputGroup>
           <Box display="flex" justifyContent="flex-end">
-            <Button onClick={onRegister} colorScheme="blue">Login</Button>
+            <Button 
+            onClick={onLogin} 
+            colorScheme="blue"
+            disabled={logining}>{logining ? <Spinner/> : "Login"}</Button>
           </Box>
         </FormControl>
       </Container>

@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
+import axios, { AxiosError, AxiosResponse } from 'axios'
 
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 import {
+  Spinner,
   Button,
   FormControl,
   FormLabel,
-  FormErrorMessage,
-  FormHelperText,
   Input,
   useBoolean,
   InputGroup,
@@ -30,12 +30,28 @@ type RegisterInputState = {
 }
 
 export default function RegisterPage() {
+  const [registering, setRegistering] = useBoolean(false);
+  const navigate = useNavigate();
   const [wideDevice] = useMediaQuery("(min-width: 800px)")
   const [showPassword, setShowPassword] = useBoolean(false);
   const [inputs, updateInputs] = useState<RegisterInputState>({} as RegisterInputState)
 
-  const onRegister = () => {
-    console.log(inputs);
+  const onRegister = async () => {
+    let { username, email, password } = inputs;
+    setRegistering.on();
+    try {
+      let newUser = await axios.post("auth/register", {
+        username: username,
+        email: email,
+        password: password
+      });
+      if (newUser) {
+        navigate("/login");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    setRegistering.off();
   }
 
   const onInputChange = (event: React.FormEvent<HTMLInputElement>) => {
@@ -89,7 +105,10 @@ export default function RegisterPage() {
             </InputRightElement>
           </InputGroup>
           <Box display="flex" justifyContent="flex-end">
-            <Button onClick={onRegister} colorScheme="blue">Register</Button>
+            <Button 
+            onClick={onRegister} 
+            colorScheme="blue"
+            disabled={registering}>{registering ? <Spinner/> : "Register"}</Button>
           </Box>
         </FormControl>
       </Container>

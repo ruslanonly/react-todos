@@ -1,8 +1,10 @@
 import express from "express";
-import UsersController from "../controllers/users.controller";
+
+import TodosController from "../controllers/todos.controller";
+import { protect } from "../middleware/authMiddleware";
 let router = express.Router();
 
-router.get("/users", UsersController.getUsers)
-router.get("/user/:id", UsersController.getUser);
+router.get("/todos", protect, TodosController.getTodos)
+router.post("/todos", protect, TodosController.setTodo)
 
 export default router;

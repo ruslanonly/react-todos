@@ -1,0 +1,2 @@
+PORT = 5000
+JWT_SECRET = 30de4f38cdddb48e82ca0c2f6a4e7cfd0fd3b1efcaae36c2dd837366e16c8cd0
