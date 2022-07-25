@@ -2,6 +2,7 @@ import jwt, { Secret } from "jsonwebtoken";
 import asyncHandler from "express-async-handler"
 import { NextFunction, Request, Response } from "express";
 import UsersService from "../services/users.service";
+import { IUserData } from "../types";
 const protect = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
   let token;
   if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
@@ -11,12 +12,12 @@ const protect = asyncHandler(async (req: Request, res: Response, next: NextFunct
 
       let { id } = decoded as {id: number};
       let user = await UsersService.getUserById(id);
-      let cookie = {
+      let userData: IUserData = {
         id: user._id,
         email: user.email,
         username: user.username
       }
-      res.cookie("user", cookie);
+      req.user = userData;
       next();
     } catch (error) {
       res.status(401);

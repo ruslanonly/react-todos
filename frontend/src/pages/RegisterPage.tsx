@@ -1,6 +1,10 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSelector, useDispatch } from "react-redux";
+
+import { register, reset } from "../features/auth/authSlice";
+
+import { IUserRegisterData } from '../types';
 
 import {
   Spinner,
@@ -15,14 +19,14 @@ import {
   Container,
   Heading,
   useMediaQuery,
+  useToast,
 } from '@chakra-ui/react'
 
 import {
   ViewIcon,
   ViewOffIcon
 } from "@chakra-ui/icons"
-
-import AuthService from "../api/services/AuthService";
+import { useAppDispatch, useAppSelector } from '../app/store';
 
 type RegisterInputState = {
   username: string,
@@ -31,11 +35,30 @@ type RegisterInputState = {
 }
 
 export default function RegisterPage() {
-  const [registering, setRegistering] = useBoolean(false);
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
+
+  const toast = useToast();
+
   const [wideDevice] = useMediaQuery("(min-width: 800px)")
   const [showPassword, setShowPassword] = useBoolean(false);
   const [inputs, updateInputs] = useState<RegisterInputState>({} as RegisterInputState)
+
+  let { user, isError, isLoading, isSuccess, message } = useAppSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (isError) {
+      toast({
+        title: message
+      })
+    }
+
+    if (isSuccess || user) {
+      navigate("/");
+    }
+
+    dispatch(reset());
+  }, [user, isError, isLoading, isSuccess, message]);
 
   const onRegister = async () => {
     let { username, email, password } = inputs;
@@ -44,16 +67,8 @@ export default function RegisterPage() {
       return;
     }
 
-    setRegistering.on();
-    try {
-      let newUser = await AuthService.register({username, email, password});
-      if (newUser) {
-        navigate("/login");
-      }
-    } catch (error) {
-      console.log(error);
-    }
-    setRegistering.off();
+    let userData: IUserRegisterData = inputs;
+    let newUser = await dispatch(register(userData));
   }
 
   const onInputChange = (event: React.FormEvent<HTMLInputElement>) => {
@@ -66,7 +81,6 @@ export default function RegisterPage() {
     display="grid" 
     gridAutoFlow={wideDevice ? "column" : "row"} 
     width="100%" 
-    height="100vh" 
     alignItems={wideDevice ? "center" : "flex-start"}
     justifyItems="center">
       <Box display="flex" gap="2" flexDirection="column" alignItems="center">
@@ -110,7 +124,7 @@ export default function RegisterPage() {
             <Button 
             onClick={onRegister} 
             colorScheme="blue"
-            disabled={registering}>{registering ? <Spinner/> : "Register"}</Button>
+            disabled={isLoading}>{isLoading ? <Spinner/> : "Register"}</Button>
           </Box>
         </FormControl>
       </Container>

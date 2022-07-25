@@ -1,4 +1,10 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom';
+
+import { login, reset } from '../features/auth/authSlice';
+import { useAppDispatch, useAppSelector } from '../app/store';
+
+import { IUserLoginData } from '../types';
 
 import {
   Button,
@@ -19,9 +25,6 @@ import {
   ViewIcon,
   ViewOffIcon
 } from "@chakra-ui/icons"
-import { Link, useNavigate } from 'react-router-dom';
-
-import AuthService from "../api/services/AuthService";
 
 type LoginInputState = {
   username: string,
@@ -29,12 +32,17 @@ type LoginInputState = {
 }
 
 export default function LoginPage() {
+
   const toast = useToast();
-  const [logining, setLogining] = useBoolean(false);
   const navigate = useNavigate();
+
+  const dispatch = useAppDispatch();
+
   const [wideDevice] = useMediaQuery("(min-width: 800px)")
   const [showPassword, setShowPassword] = useBoolean(false);
   const [inputs, updateInputs] = useState<LoginInputState>({} as LoginInputState)
+
+  let { isError, isLoading, isSuccess, message, user } = useAppSelector(state => state.auth)
 
   const onLogin = async () => {
     let { username, password } = inputs;
@@ -46,19 +54,25 @@ export default function LoginPage() {
       })
       return ;
     }
-    setLogining.on();
-    try {
-      await AuthService.login({username, password});
-      navigate("/");
-    } catch (error) {
+
+    let loginData: IUserLoginData = inputs;
+    dispatch(login(loginData));
+  }
+
+  useEffect(() => {
+    if (isError) {
       toast({
-        title: "Incorrent credentials",
-        description: "incorrect username or password",
-        status: 'error'
+        title: message,
+        status: "error"
       })
     }
-    setLogining.off();
-  }
+
+    if (isSuccess || user) {
+      navigate("/");
+    }
+
+    dispatch(reset())
+  }, [isError, isSuccess])
 
   const onInputChange = (event : React.FormEvent<HTMLInputElement>) => {
     let {name, value} = event.target as HTMLInputElement;
@@ -73,7 +87,6 @@ export default function LoginPage() {
     display="grid" 
     gridAutoFlow={wideDevice ? "column" : "row"} 
     width="100%" 
-    height="100vh" 
     alignItems={wideDevice ? "center" : "flex-start"}
     justifyItems="center">
       <Box display="flex" gap="2" flexDirection="column" alignItems="center">
@@ -109,7 +122,7 @@ export default function LoginPage() {
           </InputGroup>
           <Box display="flex" justifyContent="flex-end">
             <Button 
-            isLoading={logining}
+            isLoading={isLoading}
             onClick={onLogin} 
             colorScheme="blue">Login</Button>
           </Box>

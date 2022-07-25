@@ -1,5 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
-import axios from 'axios';
+import React, { useEffect, useState } from 'react'
 
 import {
   Spinner,
@@ -14,34 +13,34 @@ import TodoList from '../components/TodoList'
 import { IUser, ITodo } from '../types'
 import { useNavigate } from 'react-router-dom';
 import TodoService from '../api/services/TodoService';
+import { useAppSelector } from '../app/store';
 
 export default function TodosPage() {
-  const toast = useToast();
   const [loading, setLoading] = useBoolean(true);
   const navigate = useNavigate();
-  const [user, setUser] = useState({} as IUser);
   const [todos, setTodos] = useState([] as ITodo[])
-  const authorizeUser = async () => {
-    let user = JSON.parse(localStorage.getItem("user") as string);
-    if (!user) {
-      toast({
-        title: "Not authenticated.",
-        description: "We can't authorize you.",
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      })
-      navigate("/login");
-      return;
-    }
-    setUser(user);
-    setTodos(await TodoService.getTodos());
+
+  let { user } = useAppSelector(state => state.auth);
+
+  const getTodos = async () => {
+    console.log(user);
+    TodoService.getTodos(user?.token as string)
+    .then((response) => {
+      console.log(response);
+      setTodos(response as ITodo[]);
+    })
+    .catch((error) => console.log(error))
     setLoading.off()
   }
 
   useEffect(() => {
-    authorizeUser();
-  }, [])
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
+    getTodos();
+  }, [user])
 
   return loading ? 
     <Spinner 
@@ -59,11 +58,8 @@ export default function TodosPage() {
       <Container maxW="container.sm">
         <Box display="grid"
         gridTemplateRows="auto 1fr">
-          <Box display="flex" justifyContent="center">
-            <Heading py="3rem">{user.username + "'s todos"}</Heading>
-          </Box>
           <Box display="grid" gridAutoFlow="row">
-            <TodoList todos={todos}/>
+            {todos.length > 0 ? <TodoList todos={todos}/> : <Heading textAlign="center">You have no todos yet</Heading>}
           </Box>
         </Box>
       </Container>

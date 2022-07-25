@@ -6,7 +6,7 @@ import asyncHandler from "express-async-handler";
 import UsersService from "../services/users.service";
 import { IUser } from "../types";
 
-const register = asyncHandler(async (req : Request, res : Response, next: NextFunction) => {
+const register = asyncHandler(async (req : Request, res : Response) => {
   let { username, email, password } = req.body;
 
   if (!username || !email || !password) {
@@ -26,7 +26,7 @@ const register = asyncHandler(async (req : Request, res : Response, next: NextFu
     res.status(200).json({
       id: newUser._id,
       username: newUser.username,
-      email: newUser.email,
+      email: newUser.email
     });
   } else {
     res.status(400);
@@ -54,7 +54,7 @@ const login = asyncHandler(async (req: Request, res: Response, next: NextFunctio
 })
 
 const getMe = asyncHandler(async (req: Request, res: Response) => {
-  res.json(req.cookies);
+  res.json(req.user);
 })
 
 function generateToken(id: number) {

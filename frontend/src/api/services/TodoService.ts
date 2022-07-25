@@ -2,14 +2,13 @@ import axios from "axios";
 
 import { ITodo } from "../../types";
 
-async function getTodos() {
-  let authenticatedUser = JSON.parse(localStorage.getItem("user") as string);
-  let response = await axios.get("api/todos",
-    {
-      headers: {
-        Authorization: `Bearer ${authenticatedUser.token}`
-      }
-    });
+async function getTodos(token : string) {
+  let config = {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  }
+  let response = await axios.get("api/todos", config);
   return response.data as ITodo[];
 }
 

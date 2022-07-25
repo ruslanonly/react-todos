@@ -21,6 +21,10 @@ export default function Todo({ todo } : TodoProps) {
     setCompleted(prevState => !prevState);
   }
 
+  const onDelete = () => {
+    
+  }
+
   return (
     <Box display="flex" justifyContent="space-between" alignItems="center">
       <Box display="flex" gap="1rem" alignItems="center">
@@ -33,7 +37,7 @@ export default function Todo({ todo } : TodoProps) {
         fontSize="1.5rem">{todo.text}</Text>
       </Box>
       <Box display="grid" gridAutoFlow="column" gap="1rem">
-        <Button variant="ghost" size="sm"><DeleteIcon/></Button>
+        <Button variant="ghost" size="sm" onClick={onDelete}><DeleteIcon/></Button>
       </Box>
     </Box>
   )
