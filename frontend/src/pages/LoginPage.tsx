@@ -1,8 +1,6 @@
 import React, { useState } from 'react'
-import axios from 'axios';
 
 import {
-  Spinner,
   Button,
   FormControl,
   FormLabel,
@@ -13,7 +11,8 @@ import {
   Box,
   Container,
   Heading,
-  useMediaQuery
+  useMediaQuery,
+  useToast
 } from '@chakra-ui/react'
 
 import {
@@ -22,12 +21,15 @@ import {
 } from "@chakra-ui/icons"
 import { Link, useNavigate } from 'react-router-dom';
 
+import AuthService from "../api/services/AuthService";
+
 type LoginInputState = {
   username: string,
   password: string
 }
 
 export default function LoginPage() {
+  const toast = useToast();
   const [logining, setLogining] = useBoolean(false);
   const navigate = useNavigate();
   const [wideDevice] = useMediaQuery("(min-width: 800px)")
@@ -36,22 +38,24 @@ export default function LoginPage() {
 
   const onLogin = async () => {
     let { username, password } = inputs;
-
     if (!username || !password) {
+      toast({
+        title: "Not enough data",
+        description: "Fill all of the fields",
+        status: 'warning'
+      })
       return ;
     }
-
     setLogining.on();
     try {
-      let response = await axios.post("auth/login", {
-        username: username,
-        password: password
-      });
-      let user = response.data;
-      localStorage.setItem("user", JSON.stringify(user));
+      await AuthService.login({username, password});
       navigate("/");
     } catch (error) {
-      console.log(error);
+      toast({
+        title: "Incorrent credentials",
+        description: "incorrect username or password",
+        status: 'error'
+      })
     }
     setLogining.off();
   }
@@ -105,9 +109,9 @@ export default function LoginPage() {
           </InputGroup>
           <Box display="flex" justifyContent="flex-end">
             <Button 
+            isLoading={logining}
             onClick={onLogin} 
-            colorScheme="blue"
-            disabled={logining}>{logining ? <Spinner/> : "Login"}</Button>
+            colorScheme="blue">Login</Button>
           </Box>
         </FormControl>
       </Container>

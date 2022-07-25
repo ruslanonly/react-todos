@@ -1,0 +1,23 @@
+{
+  "dependencies": {
+    "concurrently": "^7.3.0"
+  },
+  "name": "react-todos",
+  "version": "1.0.0",
+  "description": "common",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "dev": "concurrently \"cd frontend && npm run start\" \"cd backend && npm run dev\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ruslanonly/react-todos.git"
+  },
+  "author": "ruslanonly",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ruslanonly/react-todos/issues"
+  },
+  "homepage": "https://github.com/ruslanonly/react-todos#readme"
+}

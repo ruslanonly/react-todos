@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
-import axios, { AxiosError, AxiosResponse } from 'axios'
-
 import { Link, useNavigate } from 'react-router-dom'
+import { useSelector, useDispatch } from "react-redux";
 
 import {
   Spinner,
@@ -23,6 +22,8 @@ import {
   ViewOffIcon
 } from "@chakra-ui/icons"
 
+import AuthService from "../api/services/AuthService";
+
 type RegisterInputState = {
   username: string,
   email: string,
@@ -38,13 +39,14 @@ export default function RegisterPage() {
 
   const onRegister = async () => {
     let { username, email, password } = inputs;
+
+    if (!username || !email || !password) {
+      return;
+    }
+
     setRegistering.on();
     try {
-      let newUser = await axios.post("auth/register", {
-        username: username,
-        email: email,
-        password: password
-      });
+      let newUser = await AuthService.register({username, email, password});
       if (newUser) {
         navigate("/login");
       }
