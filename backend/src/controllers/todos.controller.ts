@@ -18,7 +18,8 @@ const setTodo = asyncHandler(async (req: Request, res: Response) => {
 });
 
 const deleteTodo = asyncHandler(async (req: Request, res: Response) => {
-  let { todoId } = req.body;
+  let { id } = req.params;
+  let todoId: number = Number(id);
   let user: IUserData = req.user;
 
   let todo = await TodosService.getTodo(todoId);
@@ -32,4 +33,10 @@ const deleteTodo = asyncHandler(async (req: Request, res: Response) => {
   res.json(deletedTodo);
 });
 
-export default { getTodos, setTodo, deleteTodo }
+const changeTodoCompleted = asyncHandler(async (req: Request, res: Response) => {
+  let { todoId, completed } = req.body;
+  let changedTodo = await TodosService.changeTodoCompleted(todoId, completed);
+  res.json(changedTodo);
+});
+
+export default { getTodos, setTodo, deleteTodo, changeTodoCompleted }

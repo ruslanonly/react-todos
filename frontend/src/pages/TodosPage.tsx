@@ -1,21 +1,34 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 
 import {
   Spinner,
   Box,
+  Flex,
+  Button,
   Container,
   Heading,
   useBoolean,
-  useToast
 } from '@chakra-ui/react'
+
+import {
+  AddIcon
+} from "@chakra-ui/icons"
+
+import AddTodoButton from '../components/AddTodoButton'
 import TodoList from '../components/TodoList'
 
-import { IUser, ITodo } from '../types'
+import { ITodo } from '../types'
+
 import { useNavigate } from 'react-router-dom';
-import TodoService from '../api/services/TodoService';
 import { useAppSelector } from '../app/store';
+import useForceUpdate from '../utils/hooks/useForceUpdate'
+
+import TodoService from '../api/services/TodoService';
+
+import { ForceUpdateContext } from '../utils/ForceUpdateContext'
 
 export default function TodosPage() {
+  const [updateFlag, forceUpdate] = useForceUpdate();
   const [loading, setLoading] = useBoolean(true);
   const navigate = useNavigate();
   const [todos, setTodos] = useState([] as ITodo[])
@@ -23,10 +36,9 @@ export default function TodosPage() {
   let { user } = useAppSelector(state => state.auth);
 
   const getTodos = async () => {
-    console.log(user);
-    TodoService.getTodos(user?.token as string)
+    setLoading.on();
+    await TodoService.getTodos(user?.token as string)
     .then((response) => {
-      console.log(response);
       setTodos(response as ITodo[]);
     })
     .catch((error) => console.log(error))
@@ -34,12 +46,16 @@ export default function TodosPage() {
   }
 
   useEffect(() => {
+    if (user) {
+      getTodos();
+    }
+  }, [updateFlag])
+
+  useEffect(() => {
     if (!user) {
       navigate("/login");
       return;
     }
-
-    getTodos();
   }, [user])
 
   return loading ? 
@@ -50,19 +66,27 @@ export default function TodosPage() {
     m="1rem" 
     size="xl"/> 
     : (
-    <Box 
-    display="flex"
-    width="100%"
-    height="100vh"
-    >
-      <Container maxW="container.sm">
-        <Box display="grid"
-        gridTemplateRows="auto 1fr">
-          <Box display="grid" gridAutoFlow="row">
-            {todos.length > 0 ? <TodoList todos={todos}/> : <Heading textAlign="center">You have no todos yet</Heading>}
-          </Box>
+    <ForceUpdateContext.Provider value={forceUpdate as () => void}>
+      <Box 
+        display="flex"
+        width="100%"
+        height="100vh"
+        >
+          <Container maxW="container.sm">
+            <Box 
+            display="grid"
+            gridTemplateRows="1fr auto"
+            gap="3rem">
+              <Box display="grid" gridAutoFlow="row">
+                {todos.length > 0 ? <TodoList todos={todos}/> : <Heading textAlign="center">You have no todos yet</Heading>}
+              </Box>
+              <Flex justifyContent="center">
+                <AddTodoButton updateList={forceUpdate as () => void}/>
+              </Flex>
+            </Box>
+          </Container>
         </Box>
-      </Container>
-    </Box>
+    </ForceUpdateContext.Provider>
+    
   )
 }

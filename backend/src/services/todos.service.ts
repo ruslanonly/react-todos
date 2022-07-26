@@ -28,6 +28,12 @@ class UsersService {
     let deletedTodo = q_res.rows[0];
     return deletedTodo;
   }
+
+  async changeTodoCompleted(todoId: number, completed: boolean) {
+    let q_res: QueryResult = await db.query("UPDATE todos SET completed = $1 WHERE _id = $2 RETURNING *", [completed, todoId]);
+    let changedTodo = q_res.rows[0];
+    return changedTodo;
+  }
 }
 
 export default new UsersService();

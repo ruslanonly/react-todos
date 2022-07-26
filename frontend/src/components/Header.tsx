@@ -29,8 +29,8 @@ export default function Header() {
     <Box 
     width="100%">
       <Container maxW="container.lg">
-        <Flex py="2" justifyContent="space-between"  borderBottom="solid .1rem" borderColor="gray.300">
-          <Heading>Todos App</Heading>
+        <Flex py="2" justifyContent="space-between" alignItems="center" borderBottom="solid .1rem" borderColor="gray.300">
+          <Heading fontSize="lg">Todos App</Heading>
           <Box>
             { user ? <Flex alignItems="center" gap="1rem"><Heading color="blue.700" size="md">{user.username}</Heading><LogoutButton/></Flex> : null }
           </Box>
